@@ -1,5 +1,7 @@
 #include <math.h>
 
+#include "../utils/Clamp.h"
+
 #include "Player.h"
 
 int sign (float value)
@@ -25,51 +27,51 @@ void Player::Update (Game &game)
 {
 	float DeltaTime = game.Perf_DeltaTime.asSeconds();
 
-	int DirX = game.Input.IsKeyDown(sf::Keyboard::D) - game.Input.IsKeyDown(sf::Keyboard::A);
-	int DirY = game.Input.IsKeyDown(sf::Keyboard::S) - game.Input.IsKeyDown(sf::Keyboard::W);
+	bool key_left = game.Input.IsKeyDown(sf::Keyboard::A);
+	bool key_right = game.Input.IsKeyDown(sf::Keyboard::D);
+	bool key_up = game.Input.IsKeyDown(sf::Keyboard::W);
+	bool key_down = game.Input.IsKeyDown(sf::Keyboard::S);
+	bool key_jump = game.Input.IsKeyDown(sf::Keyboard::Space);
 
+	bool onGround = pos.z > size.z * -1;
+
+	int DirX = key_right - key_left;
+	int DirY = key_down - key_up;
+
+	// Controls
 	vel.x += (DirX * accel);
 	vel.y += (DirY * accel);
+
+	// Gravity
 	vel.z += 1500 * DeltaTime;
 
-	if (game.Input.IsKeyDown(sf::Keyboard::Space))
+	// Jumping
+	if (key_jump)
 	{
 		vel.z = -250;
 	}
-	
-	if (vel.x < speedMax * -1)
-	{
-		vel.x = speedMax * -1;
-	}
-	else if (vel.x > speedMax)
-	{
-		vel.x = speedMax;
-	}
-	
-	if (vel.y < speedMax * -1)
-	{
-		vel.y = speedMax * -1;
-	}
-	else if (vel.y > speedMax)
-	{
-		vel.y = speedMax;
-	}
 
+	// Limiting speed
+	vel.x = clamp(vel.x, speedMax * -1, speedMax);
+	vel.y = clamp(vel.y, speedMax * -1, speedMax);
+
+	// Friction
 	if (DirX == 0)
 	{
 		vel.x -= sign(vel.x) * friction;
 	}
-
 	if (DirY == 0)
 	{
 		vel.y -= sign(vel.y) * friction;
 	}
 
+	// Applying velocity
 	pos.x += vel.x * DeltaTime;
 	pos.y += vel.y * DeltaTime;
 	pos.z += vel.z * DeltaTime;
 
-	if (pos.z > size.z * -1)
+	// Ground collision
+	if (onGround)
 	{
 		pos.z = size.z * -1;
 		vel.z = 0;

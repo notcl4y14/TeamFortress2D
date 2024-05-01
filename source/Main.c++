@@ -43,12 +43,19 @@ int main ()
 
 	sf::Sprite crosshair;
 	crosshair.setTexture(crosshairTexture);
+
+	sf::Texture directionTexture;
+	directionTexture.loadFromFile("../assets/direction_line.png");
+
+	sf::Sprite direction;
+	direction.setTexture(directionTexture);
+	direction.setOrigin(0, 32);
 	
 	sf::Image icon;
 	icon.loadFromFile("../assets/icon_rotated.png");
 
 	game.window.setIcon(64, 64, icon.getPixelsPtr());
-	game.window.setFramerateLimit(200);
+	game.window.setFramerateLimit(500);
 
 	// Start the game loop
 	while (game.window.isOpen())
@@ -88,6 +95,11 @@ int main ()
 		sf::Vector2i mousePos = sf::Mouse::getPosition(game.window);
 
 		// std::cout << mousePos.x << "; " << mousePos.y << "\n";
+
+		direction.setPosition(player.pos.x + player.size.x / 2, player.pos.y + player.pos.z + player.size.y / 2);
+		direction.setRotation( atan2(mousePos.y - (player.pos.y + player.pos.z + player.size.y / 2), mousePos.x - (player.pos.x + player.size.x / 2)) * 180/3.14 );
+		
+		game.window.draw( direction );
 		
 		crosshair.setPosition(mousePos.x - crosshair.getTexture()->getSize().x / 2, mousePos.y - crosshair.getTexture()->getSize().y / 2);
 
